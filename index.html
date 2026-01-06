@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ducat Protocol - Bitcoin's First L1 Native Stablecoin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            cursor: default;
+        }
+        /* Rotating circle center dot */
+        .circle-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            box-shadow:
+                0 0 20px rgba(255,255,255,0.6),
+                0 0 40px rgba(255,255,255,0.25);
+        }
+        .circle-core {
+            animation: corePulse 2.5s infinite ease-in-out;
+        }
+
+        @keyframes corePulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0.8;
+            }
+        }
+
+        /* Footer */
+        .site-footer {
+            background: linear-gradient(
+                180deg,
+                rgba(255,255,255,0.02) 0%,
+                rgba(0,0,0,1) 100%
+            );
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 80px 60px 40px;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto 60px;
+            display: grid;
+            grid-template-columns: 1.5fr 2fr;
+            gap: 80px;
+        }
+
+        .footer-brand .logo {
+            margin-bottom: 20px;
+        }
+
+        .footer-tagline {
+            font-size: 16px;
+            color: #888;
+            max-width: 360px;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+        }
+
+        .footer-column h4 {
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .footer-column a {
+            display: block;
+            color: #888;
+            text-decoration: none;
+            margin-bottom: 14px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-column a:hover {
+            color: #fff;
+            transform: translateX(4px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .footer-disclaimer {
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .footer-links {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        .logo-icon2 {
+            width: 150px;
+            height: 150px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }       
+
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Snow Effect */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1em;
+            user-select: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Floating Circles */
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(100px, -100px) scale(1.1); }
+            50% { transform: translate(-50px, -50px) scale(0.9); }
+            75% { transform: translate(50px, 100px) scale(1.05); }
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 30s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Content Container */
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 30px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px;
+            height: 5px;
+            background: #fff;
+            border-radius: 50%;
+        }
+        .logo-icon2::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+        }        
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-btn {
+            padding: 12px 30px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 40px 80px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 8vw, 80px);
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 0%, #999 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 28px);
+            margin-bottom: 40px;
+            color: #ccc;
+            max-width: 800px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-description {
+            font-size: clamp(14px, 2vw, 18px);
+            margin-bottom: 50px;
+            color: #999;
+            max-width: 700px;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animated Stats */
+        .stats {
+            display: flex;
+            gap: 60px;
+            margin-top: 60px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Features Section */
+        .section {
+            padding: 120px 60px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: clamp(16px, 2.5vw, 24px);
+            color: #888;
+            text-align: center;
+            margin-bottom: 80px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.5s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            font-size: 36px;
+            position: relative;
+        }
+
+        .feature-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .feature-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        /* How It Works */
+        .workflow {
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            opacity: 0;
+            transform: translateX(-50px);
+            animation: slideIn 0.8s forwards;
+        }
+
+        .workflow-step:nth-child(even) {
+            flex-direction: row-reverse;
+            transform: translateX(50px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .step-number {
+            font-size: 120px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.1);
+            line-height: 1;
+            min-width: 150px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .step-description {
+            font-size: 18px;
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .step-tags {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Rotating 3D Circle */
+        .rotating-circle {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate3d 20s infinite linear;
+        }
+
+        @keyframes rotate3d {
+            from { transform: rotateX(45deg) rotateY(0deg); }
+            to { transform: rotateX(45deg) rotateY(360deg); }
+        }
+
+        .circle-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+        }
+
+        .circle-ring:nth-child(1) { transform: rotateX(0deg); }
+        .circle-ring:nth-child(2) { transform: rotateX(45deg); }
+        .circle-ring:nth-child(3) { transform: rotateX(90deg); }
+
+        /* Problem Solution */
+        .problem-solution {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .ps-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 50px;
+            position: relative;
+        }
+
+        .ps-card h3 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ps-card ul {
+            list-style: none;
+            font-size: 18px;
+            line-height: 2;
+            color: #999;
+        }
+
+        .ps-card ul li {
+            padding-left: 30px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .ps-card ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #fff;
+            font-size: 24px;
+        }
+
+        /* Liquidation Interactive Visualizer */
+        .liquidation-interactive {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 1200px;
+            margin: 60px auto;
+        }
+
+        .vault-simulator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .simulator-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .control-group {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .control-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slider-fill {
+            height: 100%;
+            background: #fff;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: grab;
+            transition: left 0.3s;
+        }
+
+        .slider-thumb:active {
+            cursor: grabbing;
+        }
+
+        .vault-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .collateral-bar {
+            width: 100%;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .collateral-fill {
+            height: 100%;
+            border-radius: 30px;
+            transition: all 0.5s;
+            position: relative;
+        }
+
+        .collateral-fill.safe {
+            background: linear-gradient(90deg, #fff 0%, #999 100%);
+        }
+
+        .collateral-fill.warning {
+            background: linear-gradient(90deg, #ffa500 0%, #ff6b00 100%);
+        }
+
+        .collateral-fill.danger {
+            background: linear-gradient(90deg, #ff4444 0%, #cc0000 100%);
+        }
+
+        .threshold-line {
+            position: absolute;
+            top: 0;
+            left: 84.375%;
+            width: 2px;
+            height: 100%;
+            background: #f44;
+            z-index: 1;
+        }
+
+        .threshold-label {
+            position: absolute;
+            top: -35px;
+            left: 84.375%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #f44;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .vault-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .vault-stat {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .vault-stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .vault-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .liquidation-info {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-top: 40px;
+        }
+
+        .liquidation-info h4 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .liquidation-info ul {
+            list-style: none;
+            color: #999;
+            line-height: 1.8;
+        }
+
+        .liquidation-info ul li {
+            padding-left: 25px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .liquidation-info ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #fff;
+        }
+
+        /* Call to Action */
+        .cta-section {
+            text-align: center;
+            padding: 120px 40px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.03) 100%);
+        }
+
+        .cta-section h2 {
+            font-size: clamp(32px, 5vw, 56px);
+            margin-bottom: 30px;
+        }
+
+        .cta-section p {
+            font-size: 20px;
+            color: #999;
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 18px 50px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary {
+            padding: 18px 50px;
+            background: transparent;
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: #666;
+        }
+
+        footer .logo {
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        footer p {
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        /* Scroll Animation */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #snowCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Prevents the snow from blocking mouse clicks */
+            z-index: -1;           /* Places snow behind your content */
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 20px 30px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .workflow-step {
+                flex-direction: column !important;
+            }
+
+            .problem-solution {
+                grid-template-columns: 1fr;
+            }
+
+            .vault-simulator {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 80px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <canvas id="snowCanvas"></canvas>
+    <div class="bg-animation">
+        <div class="grid-bg"></div>
+        <div id="circles-container"></div>
+        <div id="snow-container"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <!-- Navigation -->
+        <nav>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span>DUCAT</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#protocol">Protocol</a></li>
+                <li><a href="#liquidations">Liquidations</a></li>
+                <li><a href="https://docs.ducatprotocol.com/" target="_blank">Documentation</a></li>
+            </ul>
+            <button class="cta-btn" onclick="window.open('https://app.ducatprotocol.com/', '_blank')">Launch App</button>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Bitcoin L1 Stablecoin<br>& Credit Protocol</h1>
+            <div class="hero-subtitle">The First Decentralized Stablecoin Native to Bitcoin Layer 1</div>
+            <div class="rotating-circle" style="margin: 0 auto 60px;">
+                <div class="circle-ring"></div>
+                <div class="circle-ring"></div>
+                <div class="circle-ring"></div>
+
+                <!-- Center Dot -->
+                <div class="circle-core"></div>
+            </div>
+            <div class="hero-description">
+                Access dollar liquidity backed by your BTC while staying fully self-custodied on Layer 1. Ducat Protocol introduces UNIT, a 160% overcollateralized stablecoin governed by the DUCAT token, enabling Bitcoin-native DeFi without leaving the security of Bitcoin's base layer.
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">160%</div>
+                    <div class="stat-label">Overcollateralized</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">L1</div>
+                    <div class="stat-label">Bitcoin Native</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Decentralized</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem & Solution -->
+        <section class="section" id="problem-solution">
+            <div class="section-title">The Problem Ducat Solves</div>
+            <div class="section-subtitle">Bridging the gap between Bitcoin security and DeFi liquidity</div>
+            
+            <div class="problem-solution">
+                <div class="ps-card animate-on-scroll">
+                    <h3>⚠️ Current Challenges</h3>
+                    <ul>
+                        <li>Bitcoin holders can't access liquidity without selling their BTC</li>
+                        <li>Existing stablecoins rely on centralized entities or bridge risks</li>
+                        <li>Cross-chain solutions compromise security and custody</li>
+                        <li>No truly decentralized stablecoin exists on Bitcoin L1</li>
+                        <li>Limited DeFi capabilities on Bitcoin's base layer</li>
+                    </ul>
+                </div>
+                
+                <div class="ps-card animate-on-scroll">
+                    <h3>✓ Ducat's Solution</h3>
+                    <ul>
+                        <li>Self-custodied vaults keep your BTC on Layer 1</li>
+                        <li>Borrow UNIT stablecoin backed 160% by native BTC</li>
+                        <li>No bridges, no wrapped tokens, no third-party custody</li>
+                        <li>Transparent, auditable protocol built on Bitcoin Runes</li>
+                        <li>Decentralized governance through DUCAT token holders</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="section" id="how-it-works">
+            <div class="section-title">How Ducat Works</div>
+            <div class="section-subtitle">Four simple steps to unlock liquidity from your Bitcoin</div>
+            
+            <div class="workflow">
+                <div class="workflow-step" style="animation-delay: 0.2s;">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <div class="step-title">Deposit BTC</div>
+                        <div class="step-description">
+                            Deposit your Bitcoin into a Ducat vault. Your BTC remains on Bitcoin Layer 1 in a non-custodial vault that you fully control. The protocol uses advanced Bitcoin scripting to ensure you always maintain ownership while enabling collateralized borrowing.
+                        </div>
+                        <div class="step-tags">
+                            <span class="tag">Non-Custodial</span>
+                            <span class="tag">Full Control</span>
+                            <span class="tag">L1 Native</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workflow-step" style="animation-delay: 0.4s;">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <div class="step-title">Set Risk Preference</div>
+                        <div class="step-description">
+                            Choose your collateralization ratio based on your risk tolerance. Set conservative (160%+), moderate (145%), or aggressive (135%) ratios. Higher ratios provide more buffer against Bitcoin price volatility, while lower ratios maximize your borrowing power.
+                        </div>
+                        <div class="step-tags">
+                            <span class="tag">Flexible Risk</span>
+                            <span class="tag">Real-Time Monitoring</span>
+                            <span class="tag">Dynamic Adjustment</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workflow-step" style="animation-delay: 0.6s;">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <div class="step-title">Borrow UNIT</div>
+                        <div class="step-description">
+                            Mint UNIT stablecoins against your BTC collateral, borrowing up to 62.5% of your vault value. Use UNIT anywhere in the Bitcoin-Fi ecosystem for trading, investing, or earning yield. When ready, repay your debt to unlock your BTC collateral without penalty.
+                        </div>
+                        <div class="step-tags">
+                            <span class="tag">Instant Access</span>
+                            <span class="tag">No Selling BTC</span>
+                            <span class="tag">Permissionless</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workflow-step" style="animation-delay: 0.8s;">
+                    <div class="step-number">04</div>
+                    <div class="step-content">
+                        <div class="step-title">Manage & Repay</div>
+                        <div class="step-description">
+                            Monitor your vault health in real-time through an intuitive dashboard. Track collateralization ratios, BTC price movements, and liquidation thresholds. Add collateral or repay UNIT at any time to maintain a healthy vault position and avoid liquidation.
+                        </div>
+                        <div class="step-tags">
+                            <span class="tag">Real-Time Tracking</span>
+                            <span class="tag">Health Indicators</span>
+                            <span class="tag">Automatic Alerts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Protocol Features -->
+        <section class="section" id="protocol">
+            <div class="section-title">Protocol Architecture</div>
+            <div class="section-subtitle">Built on Bitcoin's foundation with cutting-edge security</div>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Bitcoin Runes Technology</div>
+                    <div class="feature-description">
+                        DUCAT and UNIT tokens leverage Bitcoin Runes for efficient on-chain representation, ensuring native compatibility with Bitcoin's security model while maintaining programmability for DeFi operations.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Multi-Party Computation</div>
+                    <div class="feature-description">
+                        A distributed MPC network manages vault operations without centralized control. Validators collectively secure the protocol through consensus-based decision making and cryptographic key sharing.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Canonical Reference Satoshis</div>
+                    <div class="feature-description">
+                        Each UNIT token is backed by specific, traceable satoshis on the Bitcoin blockchain. This creates verifiable 1:1 mapping between stablecoins and their BTC collateral, ensuring full transparency.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Oracle Price Feeds</div>
+                    <div class="feature-description">
+                        Decentralized oracle networks provide real-time BTC/USD price data, enabling accurate collateral valuations and triggering liquidations when necessary to maintain system stability.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">DUCAT Governance</div>
+                    <div class="feature-description">
+                        Protocol parameters, risk management, and upgrades are controlled by DUCAT token holders through distributed consensus. Ducat Nodes participate in governance decisions based on staked holdings.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Permissionless Architecture</div>
+                    <div class="feature-description">
+                        Anyone can open vaults, mint UNIT, or participate as a liquidator without permission. The protocol operates transparently on-chain with all rules encoded in Bitcoin scripts.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Liquidation Mechanism -->
+        <section class="section" id="liquidations">
+            <div class="section-title">Liquidation Mechanism</div>
+            <div class="section-subtitle">Protecting the protocol and creating opportunities for liquidators</div>
+            
+            <!-- Interactive Liquidation Simulator -->
+            <div class="liquidation-interactive animate-on-scroll">
+                <h3 style="text-align: center; margin-bottom: 10px; font-size: 28px;">Interactive Vault Simulator</h3>
+                <p style="text-align: center; color: #888; margin-bottom: 40px;">Adjust BTC price to see how collateralization ratio affects vault health</p>
+                
+                <div class="vault-simulator">
+                    <div class="simulator-controls">
+                        <div class="control-group">
+                            <div class="control-label">BTC Price (USD)</div>
+                            <div class="control-value">$<span id="btc-price">100,000</span></div>
+                            <div class="slider" id="price-slider">
+                                <div class="slider-fill" id="price-fill"></div>
+                                <div class="slider-thumb" id="price-thumb"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #666;">
+                                <span>$50,000</span>
+                                <span>$150,000</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label">Vault Collateral</div>
+                            <div class="control-value"><span id="btc-amount">1.0</span> BTC</div>
+                            <div class="slider" id="btc-slider">
+                                <div class="slider-fill" id="btc-fill"></div>
+                                <div class="slider-thumb" id="btc-thumb"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #666;">
+                                <span>0.5 BTC</span>
+                                <span>2.0 BTC</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label">UNIT Borrowed</div>
+                            <div class="control-value">$<span id="unit-borrowed">62,500</span></div>
+                            <div style="font-size: 14px; color: #888; margin-top: 10px;">
+                                Maximum borrowable: $<span id="max-borrow">62,500</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vault-visual">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="font-size: 14px; color: #888; margin-bottom: 10px;">Collateralization Ratio</div>
+                            <div style="font-size: 48px; font-weight: 800;" id="collat-ratio">160%</div>
+                            <div style="font-size: 14px; margin-top: 5px;" id="health-status">Healthy Vault</div>
+                        </div>
+
+                        <div class="collateral-bar">
+                            <div class="threshold-label">135% Liquidation Threshold</div>
+                            <div class="threshold-line"></div>
+                            <div class="collateral-fill safe" id="collat-fill"></div>
+                        </div>
+
+                        <div class="vault-stats">
+                            <div class="vault-stat">
+                                <div class="vault-stat-label">Total Value</div>
+                                <div class="vault-stat-value">$<span id="total-value">100,000</span></div>
+                            </div>
+                            <div class="vault-stat">
+                                <div class="vault-stat-label">Debt Value</div>
+                                <div class="vault-stat-value">$<span id="debt-value">62,500</span></div>
+                            </div>
+                            <div class="vault-stat">
+                                <div class="vault-stat-label">Available to Borrow</div>
+                                <div class="vault-stat-value">$<span id="available-borrow">0</span></div>
+                            </div>
+                            <div class="vault-stat">
+                                <div class="vault-stat-label">Liquidation Price</div>
+                                <div class="vault-stat-value">$<span id="liq-price">84,375</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="liquidation-info">
+                    <h4>Understanding Liquidations</h4>
+                    <ul>
+                        <li>When a vault's collateralization falls below 135%, it becomes eligible for liquidation</li>
+                        <li>Liquidators can purchase the vault's BTC at a discount by repaying the UNIT debt</li>
+                        <li>The 135% threshold provides a buffer against sudden BTC price drops</li>
+                        <li>Liquidation tax funds protocol operations and incentivizes fast liquidations</li>
+                        <li>The process is fully decentralized with no whitelisting or preferred liquidators</li>
+                        <li>Profit-sharing mechanism increases as collateralization decreases, creating strong incentives</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="features-grid" style="margin-top: 80px;">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Liquidator Rewards</div>
+                    <div class="feature-description">
+                        Earn immediate profits by recapitalizing distressed vaults. Purchase BTC collateral at discounts of 5-10% while maintaining protocol health. Competitive liquidation marketplace ensures efficient price discovery.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Protocol Stability</div>
+                    <div class="feature-description">
+                        Automated liquidations maintain UNIT's dollar peg by ensuring all outstanding stablecoins remain overcollateralized. Economic incentives align liquidators with protocol health.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Profit Settlement</div>
+                    <div class="feature-description">
+                        Liquidation profits are distributed transparently on-chain. The system calculates discount rates based on collateral shortfall, creating fair pricing while protecting the protocol.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust Model -->
+        <section class="section">
+            <div class="section-title">Trust Assumptions</div>
+            <div class="section-subtitle">Understanding Ducat's security and decentralization model</div>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Asset Management</div>
+                    <div class="feature-description">
+                        Your BTC never leaves Bitcoin L1. Vaults use Bitcoin's native scripting with time-locks and multi-signature requirements. No bridges, no wrapped assets, no third-party custody at any point.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Decentralized Validation</div>
+                    <div class="feature-description">
+                        MPC validator network operates without central authority. Threshold signatures require honest majority for operations. Validators are economically incentivized through DUCAT tokens.
+                    </div>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">Supply Control</div>
+                    <div class="feature-description">
+                        UNIT supply is algorithmically controlled by on-chain collateral ratios. No entity can mint unbacked tokens. All issuance is transparent and verifiable on Bitcoin's blockchain.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta-section">
+            <div class="rotating-circle" style="margin: 0 auto 60px;">
+                <div class="circle-ring"></div>
+                <div class="circle-ring"></div>
+                <div class="circle-ring"></div>
+
+                <!-- Center Dot -->
+                <div class="circle-core"></div>
+            </div>
+
+            
+            <h2>Start Building on Bitcoin DeFi</h2>
+            <p>Join the future of Bitcoin-native finance. Unlock liquidity, maintain custody, and participate in the decentralized economy.</p>
+            
+            <div class="cta-buttons">
+                <button class="btn-primary" onclick="window.open('https://app.ducatprotocol.com/', '_blank')">Launch Application</button>
+                <button class="btn-secondary" onclick="window.open('https://docs.ducatprotocol.com/', '_blank')">Read Documentation</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-container">
+                <!-- Brand -->
+                <div class="footer-brand">
+                    <div class="logo">
+                        <div class="logo-icon2"></div>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Protocol</h4>
+                        <a href="#how-it-works">How It Works</a>
+                        <a href="#protocol">Architecture</a>
+                        <a href="#liquidations">Liquidations</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="https://docs.ducatprotocol.com/" target="_blank">Documentation</a>
+                        <a href="https://app.ducatprotocol.com/" target="_blank">Launch App</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Community</h4>
+                        <a href="https://x.com/Ducatstable" target="_blank">X / Twitter</a>
+                        <a href="https://discord.gg/ducat" target="_blank">Discord</a>
+                    </div>
+                </div>
+            </div>
+
+        </footer>
+
+    </div>
+
+    <script>
+        // Create snow effect
+        function createSnow() {
+            const container = document.getElementById('snow-container');
+            const snowflakeCount = 50;
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.innerHTML = '❄';
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                snowflake.style.animationDelay = Math.random() * 10 + 's';
+                snowflake.style.fontSize = (Math.random() * 0.5 + 0.5) + 'em';
+                snowflake.style.opacity = Math.random() * 0.3 + 0.1;
+                container.appendChild(snowflake);
+            }
+        }
+
+        // Create floating circles
+        function createCircles() {
+            const container = document.getElementById('circles-container');
+            const circleCount = 15;
+            
+            for (let i = 0; i < circleCount; i++) {
+                const circle = document.createElement('div');
+                circle.classList.add('floating-circle');
+                const size = Math.random() * 300 + 100;
+                circle.style.width = size + 'px';
+                circle.style.height = size + 'px';
+                circle.style.left = Math.random() * 100 + '%';
+                circle.style.top = Math.random() * 100 + '%';
+                circle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                circle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(circle);
+            }
+        }
+
+        // Liquidation Simulator
+        let btcPrice = 100000;
+        let btcAmount = 1.0;
+        let unitBorrowed = 62500;
+
+        function updateSimulator() {
+            const totalValue = btcPrice * btcAmount;
+            const collatRatio = (totalValue / unitBorrowed) * 100;
+            const maxBorrow = totalValue * 0.625;
+            const availableBorrow = Math.max(0, maxBorrow - unitBorrowed);
+            const liqPrice = (unitBorrowed * 1.35) / btcAmount;
+            
+            // Update displays
+            document.getElementById('btc-price').textContent = btcPrice.toLocaleString();
+            document.getElementById('btc-amount').textContent = btcAmount.toFixed(2);
+            document.getElementById('unit-borrowed').textContent = unitBorrowed.toLocaleString();
+            document.getElementById('max-borrow').textContent = maxBorrow.toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('collat-ratio').textContent = collatRatio.toFixed(1) + '%';
+            document.getElementById('total-value').textContent = totalValue.toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('debt-value').textContent = unitBorrowed.toLocaleString();
+            document.getElementById('available-borrow').textContent = availableBorrow.toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('liq-price').textContent = liqPrice.toLocaleString(undefined, {maximumFractionDigits: 0});
+            
+            // Update collateral bar
+            const collatFill = document.getElementById('collat-fill');
+            const barWidth = Math.min(collatRatio / 1.6, 100);
+            collatFill.style.width = barWidth + '%';
+            
+            // Update health status and color
+            const healthStatus = document.getElementById('health-status');
+            if (collatRatio >= 160) {
+                collatFill.className = 'collateral-fill safe';
+                healthStatus.textContent = '✓ Healthy Vault';
+                healthStatus.style.color = '#fff';
+            } else if (collatRatio >= 135) {
+                collatFill.className = 'collateral-fill warning';
+                healthStatus.textContent = '⚠ Warning Zone';
+                healthStatus.style.color = '#ffa500';
+            } else {
+                collatFill.className = 'collateral-fill danger';
+                healthStatus.textContent = '⚠ LIQUIDATION RISK';
+                healthStatus.style.color = '#ff4444';
+            }
+        }
+
+        // Slider functionality
+        function initSlider(sliderId, thumbId, fillId, min, max, value, onChange) {
+            const slider = document.getElementById(sliderId);
+            const thumb = document.getElementById(thumbId);
+            const fill = document.getElementById(fillId);
+            
+            let isDragging = false;
+            
+            function updateSlider(clientX) {
+                const rect = slider.getBoundingClientRect();
+                let percent = (clientX - rect.left) / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+                
+                const newValue = min + (max - min) * percent;
+                onChange(newValue);
+                
+                thumb.style.left = (percent * 100) + '%';
+                fill.style.width = (percent * 100) + '%';
+            }
+            
+            slider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                updateSlider(e.clientX);
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    updateSlider(e.clientX);
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            // Touch support
+            slider.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                updateSlider(e.touches[0].clientX);
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    updateSlider(e.touches[0].clientX);
+                }
+            });
+            
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+            
+            // Initialize position
+            const initialPercent = (value - min) / (max - min);
+            thumb.style.left = (initialPercent * 100) + '%';
+            fill.style.width = (initialPercent * 100) + '%';
+        }
+
+        // Scroll animation observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', () => {
+            createSnow();
+            createCircles();
+            
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Initialize sliders
+            initSlider('price-slider', 'price-thumb', 'price-fill', 50000, 150000, 100000, (val) => {
+                btcPrice = Math.round(val);
+                updateSimulator();
+            });
+            
+            initSlider('btc-slider', 'btc-thumb', 'btc-fill', 0.5, 2.0, 1.0, (val) => {
+                btcAmount = val;
+                updateSimulator();
+            });
+            
+            updateSimulator();
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, snowflakes = [];
+
+        function init() {
+            resize();
+            createSnowflakes();
+            animate();
+        }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', resize);
+
+        class Snowflake {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height * -1;
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 1 + 0.5;
+                this.velY = this.speed;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.angle += 0.01;
+                this.x += Math.cos(this.angle) * 0.5;
+                this.y += this.velY;
+                if (this.y > height) { this.reset(); this.y = -10; }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        function createSnowflakes() {
+            for (let i = 0; i < 150; i++) { snowflakes.push(new Snowflake()); }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            snowflakes.forEach(flake => { flake.update(); flake.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        // Parallax effect for hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero && scrolled < window.innerHeight) {
+                    hero.style.transform = `translateY(${scrolled * 0.04}px)`;
+                    hero.style.opacity = 1 - (scrolled / window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>
