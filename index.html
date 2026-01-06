@@ -1633,9 +1633,10 @@
             const hero = document.querySelector('.hero');
             if (hero && scrolled < window.innerHeight) {
                     hero.style.transform = `translateY(${scrolled * 0.04}px)`;
-                    hero.style.opacity = 1 - (scrolled / window.innerHeight);
+                    hero.style.opacity = 10 - (scrolled / window.innerHeight);
             }
         });
     </script>
 </body>
 </html>
+
